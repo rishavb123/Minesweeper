@@ -1,3 +1,4 @@
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -11,14 +12,15 @@ public class Grid {
 
     private JPanel panel;
 
-    public Grid(int width, int height) {
+    public Grid(int width, int height, JFrame frame) {
         this.width = width;
         this.height = height;
         tiles = new Tile[width][height];
         panel = new JPanel(new GridLayout(width, height));
+        frame.add(panel);
         for(int i = 0; i < width; i++) {
             for(int j = 0; j < height; j++) {
-                tiles[i][j] = new Tile();
+                tiles[i][j] = new Tile(frame.getWidth() / width, frame.getHeight() / height);
                 panel.add(tiles[i][j].getButton());
             }
         }

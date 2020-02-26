@@ -1,3 +1,5 @@
+import javax.swing.ImageIcon;
+import java.awt.Image;
 import javax.swing.JToggleButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -12,7 +14,7 @@ public class Tile {
     private JToggleButton button;
     private int state = UNSET_STATE;
 
-    public Tile() {
+    public Tile(int width, int height) {
         button = new JToggleButton();
         button.addMouseListener(new MouseAdapter() {
             
@@ -22,6 +24,12 @@ public class Tile {
             }
 
         });
+
+        ImageIcon icon = new ImageIcon("./sprites/block.png");
+
+        icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+
+        button.setIcon(icon);
     }
 
     public void setState(int state) {

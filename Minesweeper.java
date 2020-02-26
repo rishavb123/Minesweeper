@@ -18,8 +18,8 @@ public class Minesweeper extends JPanel {
         frame.add(this);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        grid = new Grid(10, 10);
-        frame.add(grid.getPanel());
+        grid = new Grid(10, 10, frame);
+        // frame.add(grid.getPanel());
         
         frame.setVisible(true);
     }
