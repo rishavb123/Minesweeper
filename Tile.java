@@ -8,32 +8,75 @@ public class Tile {
 
     public final int UNSET_STATE = 908327987;
     public final int BOMB_STATE = 902923334;
-    public final int EMPTY_STATE = 234822490;
-    public final int NUMBER_STATE = 238423322;
+    public final int EMPTY_STATE = 0;
+
+    public boolean flagged;
 
     private JToggleButton button;
-    private int state = UNSET_STATE;
+    private int state;
 
-    public Tile(int width, int height) {
+    private Location location;
+
+    private int width;
+    private int height;
+
+    private Grid grid;
+    private Minesweeper game;
+
+    public Tile(int x, int y, int width, int height, Grid grid) {
+
+        game = grid.getGame();
+
         button = new JToggleButton();
         button.addMouseListener(new MouseAdapter() {
             
             @Override
-            public void mouseClicked(MouseEvent e) {
-                System.out.println("Clicked me!");
+            public void mouseReleased(MouseEvent e) {
+                if(e.getButton() == MouseEvent.BUTTON3) {
+                    if(!button.isSelected() && (game.getFlags() > 0 || isFlagged()))
+                        setFlagged(!isFlagged());
+                }
+                else {
+                    if(button.isEnabled()) {
+                        button.setEnabled(false);
+                    }
+                }
             }
 
         });
 
-        ImageIcon icon = new ImageIcon("./sprites/block.png");
+        this.location = new Location(x, y);
 
-        icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        this.width = width;
+        this.height = height;
 
-        button.setIcon(icon);
+        this.grid = grid;
+
+        button.setIcon(createIcon("./sprites/block.png"));
+        setState(UNSET_STATE);
+        
+    }
+
+    public ImageIcon createIcon(String iconPath) {
+        ImageIcon icon = new ImageIcon(iconPath);
+        icon.setImage(icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+        return icon;
     }
 
     public void setState(int state) {
         this.state = state;
+        switch(state) {
+            case BOMB_STATE:
+                button.setDisabledIcon(createIcon("./sprites/bomb.png"));
+                break;
+            case UNSET_STATE:
+            case EMPTY_STATE:
+                button.setDisabledIcon(createIcon("./sprites/empty.png"));
+                break;
+            default:
+                button.setDisabledIcon(createIcon("./sprites/" + state + ".png"));
+                break;
+        }
     }
 
     public int getState() {
@@ -42,6 +85,29 @@ public class Tile {
 
     public JToggleButton getButton() {
         return button;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public boolean isFlagged() {
+        return flagged;
+    }
+
+    public void setFlagged(boolean flagged) {
+        if(this.flagged == flagged) return;
+        if(flagged) {
+            button.setDisabledIcon(createIcon("./sprites/flagged.png"));
+            button.setEnabled(false);
+            game.useFlag();
+        }
+        else {
+            setState(state);
+            button.setEnabled(true);
+            game.addFlag();
+        }
+        this.flagged = flagged;
     }
 
 }

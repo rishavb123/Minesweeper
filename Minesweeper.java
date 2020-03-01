@@ -1,5 +1,10 @@
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import java.awt.BorderLayout;
 
 public class Minesweeper extends JPanel {
 
@@ -11,6 +16,8 @@ public class Minesweeper extends JPanel {
     private JFrame frame;
 
     private Grid grid;
+    private int flags;
+    private JLabel flagsLabel;
 
     public Minesweeper() {
         frame = new JFrame("Minesweeper");
@@ -18,10 +25,42 @@ public class Minesweeper extends JPanel {
         frame.add(this);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        grid = new Grid(10, 10, frame);
-        // frame.add(grid.getPanel());
+        grid = new Grid(10, 10, this);
+        flags = 10;
+
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu menu = new JMenu("Hello world");
+        menuBar.add(menu);
+        JMenuItem menuItem = new JMenuItem("A text-only menu item");
+        menu.add(menuItem);
+
+        flagsLabel = new JLabel(flags + " flags left");
+        frame.add(flagsLabel, BorderLayout.NORTH);
         
+        frame.setJMenuBar(menuBar);
         frame.setVisible(true);
+    }
+
+    public JFrame getFrame() {
+        return frame;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    public void setFlags(int flags) {
+        this.flags = flags;
+        flagsLabel.setText(flags + " flags left");
+    }
+
+    public void useFlag() {
+        setFlags(flags - 1);
+    }
+
+    public void addFlag() {
+        setFlags(flags + 1);
     }
 
     public static void main(String[] args) {

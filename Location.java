@@ -8,7 +8,6 @@ public class Location {
         this.y = y;
     }
 
-
     public int getX() {
         return x;
     }
@@ -23,6 +22,11 @@ public class Location {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    @Override
+    public String toString() {
+        return x + " " + y;
     }
 
 }
