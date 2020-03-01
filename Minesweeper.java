@@ -63,8 +63,4 @@ public class Minesweeper extends JPanel {
         setFlags(flags + 1);
     }
 
-    public static void main(String[] args) {
-        new Minesweeper();
-    }
-
 }

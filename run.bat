@@ -1,2 +1,2 @@
 @echo off
-clean && rjava Minesweeper
+clean && rjava Runner
