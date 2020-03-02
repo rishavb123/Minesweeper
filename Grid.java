@@ -98,6 +98,8 @@ public class Grid {
                 if(tile.getState() == Tile.UNSET_STATE) {
                     tile.setState(bombFilter.filter(getNeighbors(x, y)).size());
                 }
+                if(tile.isFlagged()) 
+                    tile.getButton().setDisabledIcon(tile.createIcon("./sprites/flagged.png"));
             }
     }
 

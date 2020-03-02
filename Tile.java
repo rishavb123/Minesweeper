@@ -40,8 +40,10 @@ public class Tile {
                 }
                 else {
                     if(button.isEnabled()) {
-                        if(!grid.didGenerateBombs())
+                        if(!grid.didGenerateBombs()) {
                             grid.generateBombs(location);
+                            game.startTimer();
+                        }
                         reveal();
                         if(state == BOMB_STATE) {
                             button.setDisabledIcon(createIcon("./sprites/red_mine.jpg"));
@@ -82,8 +84,10 @@ public class Tile {
                 public boolean shouldKeep(Tile obj) {
                     return !obj.isRevealed() && !obj.isFlagged();
                 }
-            }.filter(grid.getNeighbors(this))) 
+
+            }.filter(grid.getNeighbors(this))) {
                 tile.reveal();
+            }
         }
     }
 

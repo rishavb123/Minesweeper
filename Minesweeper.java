@@ -4,12 +4,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import java.awt.BorderLayout;
@@ -37,9 +40,12 @@ public class Minesweeper extends JPanel {
 
     private JPanel topPanel;
     private JLabel flagsLabel;
+    private JLabel timeLabel;
 
     private boolean playing;
+    private int time;
 
+    private Timer timer;
 
     public Minesweeper() {
         frame = new JFrame("Minesweeper");
@@ -65,6 +71,7 @@ public class Minesweeper extends JPanel {
                     gridWidth = newGridWidth;
                     gridHeight = newGridHeight;
                     numOfBombs = newNumOfBombs;
+                    frame.setSize(50 * newGridWidth, 50 * newGridHeight + topPanelHeight);
                     reset();
                 }
                 
@@ -77,16 +84,21 @@ public class Minesweeper extends JPanel {
         frame.add(topPanel, BorderLayout.NORTH);
 
         flags = numOfBombs;
-        flagsLabel = new JLabel(flags + " flags left");
+        flagsLabel = new JLabel(flags + " flags left", SwingConstants.CENTER);
         topPanel.add(flagsLabel);
 
         playing = true;
 
+        timer = new Timer();
+
         JButton button = new JButton();
+        button.setPreferredSize(new Dimension(topPanelHeight, topPanelHeight));
         ImageIcon icon = new ImageIcon("./sprites/face.jpg");
         icon.setImage(icon.getImage().getScaledInstance(topPanelHeight, topPanelHeight, Image.SCALE_SMOOTH));
         button.setIcon(icon);
-        topPanel.add(button);
+        JPanel tempPanel = new JPanel();
+        tempPanel.add(button);
+        topPanel.add(tempPanel);
         button.addActionListener(new ActionListener() {
 
             @Override
@@ -96,7 +108,9 @@ public class Minesweeper extends JPanel {
             
         });
 
-        topPanel.add(new JLabel("Timer"));
+        timeLabel = new JLabel("000", SwingConstants.CENTER);
+        
+        topPanel.add(timeLabel);
 
         frame.setJMenuBar(menuBar);
 
@@ -105,16 +119,33 @@ public class Minesweeper extends JPanel {
         frame.setVisible(true);
     }
 
+    public void startTimer() {
+        timer = new Timer();
+        timer.schedule(new TimerTask(){
+        
+            @Override
+            public void run() {
+                time++;
+                if(time > 999) time = 999;
+                timeLabel.setText(String.format("%03d", time));
+            }
+        }, 0, 1000);
+    }
+
     public void reset() {
         frame.remove(grid.getPanel());
         grid = new Grid(gridWidth, gridHeight, frame.getWidth(), frame.getHeight() - topPanelHeight, numOfBombs, this);
         setFlags(-1);
         setFlags(numOfBombs);
         playing = true;
+        time = 0;
+        timeLabel.setText("000");
+        timer.cancel();
     }
 
     public void gameOver() {
         playing = false;
+        timer.cancel();
         for(Tile tile: grid.getTileList()) {
             if(tile.isFlagged() && tile.getState() != Tile.BOMB_STATE) {
                 tile.setFlagged(false);
