@@ -1,2 +1,2 @@
 @echo off
-clean && rjava Runner
+rjava Runner && clean
