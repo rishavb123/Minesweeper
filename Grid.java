@@ -1,5 +1,7 @@
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,20 +16,25 @@ public class Grid {
 
     private Minesweeper game;
 
-    public Grid(int width, int height, Minesweeper game) {
+    private int numOfBombs;
+    private boolean generatedBombs;
+
+    public Grid(int width, int height, int pixelWidth, int pixelHeight, int numOfBombs, Minesweeper game) {
         this.width = width;
         this.height = height;
         tiles = new Tile[width][height];
         panel = new JPanel(new GridLayout(width, height));
+        panel.setPreferredSize(new Dimension(50 * width, 50 * height));
         JFrame frame = game.getFrame();
         frame.add(panel);
         this.game = game;
         for(int i = 0; i < width; i++) {
             for(int j = 0; j < height; j++) {
-                tiles[i][j] = new Tile(i, j, frame.getWidth() / width, frame.getHeight() / height, this);
+                tiles[i][j] = new Tile(i, j, pixelWidth / width, pixelHeight / height, this);
                 panel.add(tiles[i][j].getButton());
             }
         }
+        this.numOfBombs = numOfBombs;
     }
 
     public Tile get(Location loc) {
@@ -35,7 +42,7 @@ public class Grid {
     }
 
     public Tile get(int x, int y) {
-        return tiles[x][y];
+        return isValid(x, y)? tiles[x][y]: null;
     }
 
     public List<Tile> getNeighbors(Tile tile) {
@@ -51,9 +58,56 @@ public class Grid {
 
         for(int i = -1; i < 2; i++)
             for(int j = -1; j < 2; j++)
-                if(i != 0 || j != 0)
+                if((i != 0 || j != 0) && isValid(x + i, y + j))
                     list.add(get(x + i, y + j));
 
+        return list;
+    }
+
+    public boolean isValid(Location location) {
+        return isValid(location.getX(), location.getY());
+    }
+
+    public boolean isValid(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    public void generateBombs(Location location) {
+        generatedBombs = true;
+        int bombCount = 0;
+        while(bombCount < numOfBombs) {
+            int bombX = (int) (Math.random() * width);
+            int bombY = (int) (Math.random() * height);
+
+            if(get(bombX, bombY).getState() == Tile.UNSET_STATE && (Math.abs(bombX - location.getX()) > 1 || Math.abs(bombY - location.getY()) > 1)) {
+                get(bombX, bombY).setState(Tile.BOMB_STATE);
+                bombCount++;
+            }
+        }
+        Util.Filter<Tile> bombFilter = new Util.Filter<Tile>() {
+
+            @Override
+            public boolean shouldKeep(Tile obj) {
+                return obj.getState() == Tile.BOMB_STATE;
+            }
+            
+        };
+        for(int x = 0; x < width; x++)
+            for(int y = 0; y < height; y++) {
+                Tile tile = get(x, y);
+                if(tile.getState() == Tile.UNSET_STATE) {
+                    tile.setState(bombFilter.filter(getNeighbors(x, y)).size());
+                }
+            }
+    }
+
+    public Tile[][] getTiles() {
+        return tiles;
+    }
+
+    public List<Tile> getTileList() {
+        List<Tile> list = new ArrayList<>();
+        for(Tile[] arr: tiles) for(Tile t: arr) list.add(t);
         return list;
     }
 
@@ -67,6 +121,10 @@ public class Grid {
 
     public int getHeight() {
         return height;
+    }
+
+    public boolean didGenerateBombs() {
+        return generatedBombs;
     }
 
     public Minesweeper getGame() {
