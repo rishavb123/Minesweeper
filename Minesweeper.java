@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -23,15 +24,14 @@ public class Minesweeper extends JPanel {
 
     private static final long serialVersionUID = 8501019418928408310L;
 
-    private int width = 750;
-    private int height = 800;
     private int topPanelHeight = 50;
-   
+
     private int gridWidth = 9;
     private int gridHeight = 9;
     private int numOfBombs = 10;
 
-    List<String> difficulties = Arrays.asList("Beginner 9 9 10", "Intermediate 16 16 40", "Expert 16 30 99");
+    List<String> difficulties = Arrays.asList("Beginner 10 10 9", "Intermediate 16 16 40", "Expert 30 16 99");
+    List<String> iconFolders = Arrays.asList("Default", "Test");
 
     private JFrame frame;
 
@@ -41,43 +41,71 @@ public class Minesweeper extends JPanel {
     private JPanel topPanel;
     private JLabel flagsLabel;
     private JLabel timeLabel;
+    private JButton smileButton;
 
     private boolean playing;
     private int time;
 
     private Timer timer;
 
+    private int numSelected;
+
+    private String iconFolder = "Default";
+
     public Minesweeper() {
         frame = new JFrame("Minesweeper");
-        frame.setSize(width, height);
+        frame.setSize(Tile.WIDTH * gridWidth, Tile.WIDTH * gridHeight + topPanelHeight);
         frame.add(this);
+        frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JMenuBar menuBar = new JMenuBar();
 
-        JMenu menu = new JMenu("Difficulty");
+        JMenu menu = new JMenu("Game");
+        JMenu icons = new JMenu("Icon");
+        JMenu controls = new JMenu("Controls");
 
         menuBar.add(menu);
-        for(String difficulty: difficulties) {
+        menuBar.add(icons);
+        menuBar.add(controls);
+
+        for (String difficulty : difficulties) {
             String[] arr = difficulty.split(" ");
             final int newGridWidth = Integer.parseInt(arr[1]);
             final int newGridHeight = Integer.parseInt(arr[2]);
             final int newNumOfBombs = Integer.parseInt(arr[3]);
             JMenuItem menuItem = new JMenuItem(arr[0]);
             menuItem.addActionListener(new ActionListener() {
-                
+
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     gridWidth = newGridWidth;
                     gridHeight = newGridHeight;
                     numOfBombs = newNumOfBombs;
-                    frame.setSize(50 * newGridWidth, 50 * newGridHeight + topPanelHeight);
+                    frame.setSize(Tile.WIDTH * gridWidth, Tile.WIDTH * gridHeight + topPanelHeight);
                     reset();
                 }
-                
+
             });
             menu.add(menuItem);
         }
+
+        for(String iconFolder: iconFolders) {
+            JMenuItem menuItem = new JMenuItem(iconFolder);
+            menuItem.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setIconFolder(iconFolder);
+                }
+                
+            });
+            icons.add(menuItem);
+        }
+
+        JTextArea textArea = new JTextArea("   - Left-click an empty square to reveal it.\n   - Right-click an empty square to flag it.\n   - Press the middle top button to restart the game.   ");
+        textArea.setEditable(false);
+        controls.add(textArea);
 
         topPanel = new JPanel(new GridLayout(1, 3));
         topPanel.setPreferredSize(new Dimension(frame.getWidth(), topPanelHeight));
@@ -91,25 +119,25 @@ public class Minesweeper extends JPanel {
 
         timer = new Timer();
 
-        JButton button = new JButton();
-        button.setPreferredSize(new Dimension(topPanelHeight, topPanelHeight));
-        ImageIcon icon = new ImageIcon("./sprites/face.jpg");
-        icon.setImage(icon.getImage().getScaledInstance(topPanelHeight, topPanelHeight, Image.SCALE_SMOOTH));
-        button.setIcon(icon);
+        smileButton = new JButton();
+        smileButton.setPreferredSize(new Dimension(topPanelHeight, topPanelHeight));
+        
+        setSmileIcon("./" + iconFolder + "/face.png");
+
         JPanel tempPanel = new JPanel();
-        tempPanel.add(button);
+        tempPanel.add(smileButton);
         topPanel.add(tempPanel);
-        button.addActionListener(new ActionListener() {
+        smileButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 reset();
             }
-            
+
         });
 
         timeLabel = new JLabel("000", SwingConstants.CENTER);
-        
+
         topPanel.add(timeLabel);
 
         frame.setJMenuBar(menuBar);
@@ -117,6 +145,33 @@ public class Minesweeper extends JPanel {
         grid = new Grid(gridWidth, gridHeight, frame.getWidth(), frame.getHeight() - topPanelHeight, numOfBombs, this);
 
         frame.setVisible(true);
+    }
+
+    public void setSmileIcon(String path) {
+        ImageIcon icon = new ImageIcon(path);
+        icon.setImage(icon.getImage().getScaledInstance(topPanelHeight, topPanelHeight, Image.SCALE_SMOOTH));
+        smileButton.setIcon(icon);
+    }
+
+    public int getNumSelected() {
+        return numSelected;
+    }
+
+    public void setIconFolder(String iconFolder) {
+        this.iconFolder = iconFolder;
+        reset();
+    }
+
+    public String getIconFolder() {
+        return iconFolder;
+    }
+
+    public void addSelected() {
+        this.numSelected++;
+    }
+
+    public void removeSelected() {
+        this.numSelected--;
     }
 
     public void startTimer() {
@@ -133,6 +188,7 @@ public class Minesweeper extends JPanel {
     }
 
     public void reset() {
+        setSmileIcon("./" + iconFolder + "/face.png");
         frame.remove(grid.getPanel());
         grid = new Grid(gridWidth, gridHeight, frame.getWidth(), frame.getHeight() - topPanelHeight, numOfBombs, this);
         setFlags(-1);
@@ -141,15 +197,17 @@ public class Minesweeper extends JPanel {
         time = 0;
         timeLabel.setText("000");
         timer.cancel();
+        numSelected = 0;
     }
 
     public void gameOver() {
         playing = false;
         timer.cancel();
+        setSmileIcon("./" + iconFolder + "/dead.png");
         for(Tile tile: grid.getTileList()) {
             if(tile.isFlagged() && tile.getState() != Tile.BOMB_STATE) {
                 tile.setFlagged(false);
-                tile.getButton().setIcon(tile.createIcon("./sprites/not_mine.jpg"));
+                tile.getButton().setIcon(tile.createIcon("./" + iconFolder + "/not_mine.png"));
             }
             if(!tile.isRevealed())
                 if(tile.getState() == Tile.BOMB_STATE)
@@ -160,6 +218,18 @@ public class Minesweeper extends JPanel {
         }
 
     }
+
+    public void wonGame() {
+        playing = false;
+        timer.cancel();
+        setSmileIcon("./" + iconFolder + "/win.png");
+        for(Tile tile: grid.getTileList()) {
+            if(!tile.isFlagged() && tile.getState() == Tile.BOMB_STATE) {
+                tile.setFlagged(true);
+            }
+            tile.getButton().setEnabled(false);
+        }
+    }
     
     public boolean isPlaying() {
         return playing;
@@ -167,6 +237,10 @@ public class Minesweeper extends JPanel {
 
     public JFrame getFrame() {
         return frame;
+    }
+
+    public int getNumOfBombs() {
+        return numOfBombs;
     }
 
     public int getFlags() {

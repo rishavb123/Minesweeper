@@ -22,15 +22,15 @@ public class Grid {
     public Grid(int width, int height, int pixelWidth, int pixelHeight, int numOfBombs, Minesweeper game) {
         this.width = width;
         this.height = height;
-        tiles = new Tile[width][height];
-        panel = new JPanel(new GridLayout(width, height));
-        panel.setPreferredSize(new Dimension(50 * width, 50 * height));
+        tiles = new Tile[height][width];
+        panel = new JPanel(new GridLayout(height, width));
+        panel.setPreferredSize(new Dimension(Tile.WIDTH * height, Tile.WIDTH * width));
         JFrame frame = game.getFrame();
         frame.add(panel);
         this.game = game;
-        for(int i = 0; i < width; i++) {
-            for(int j = 0; j < height; j++) {
-                tiles[i][j] = new Tile(i, j, pixelWidth / width, pixelHeight / height, this);
+        for(int i = 0; i < height; i++) {
+            for(int j = 0; j < width; j++) {
+                tiles[i][j] = new Tile(i, j, this);
                 panel.add(tiles[i][j].getButton());
             }
         }
@@ -69,17 +69,19 @@ public class Grid {
     }
 
     public boolean isValid(int x, int y) {
-        return x >= 0 && x < width && y >= 0 && y < height;
+        return x >= 0 && x < height && y >= 0 && y < width;
     }
 
     public void generateBombs(Location location) {
         generatedBombs = true;
         int bombCount = 0;
         while(bombCount < numOfBombs) {
-            int bombX = (int) (Math.random() * width);
-            int bombY = (int) (Math.random() * height);
+            int bombX = (int) (Math.random() * height);
+            int bombY = (int) (Math.random() * width);
 
-            if(get(bombX, bombY).getState() == Tile.UNSET_STATE && (Math.abs(bombX - location.getX()) > 1 || Math.abs(bombY - location.getY()) > 1)) {
+            if(get(bombX, bombY).getState() == Tile.UNSET_STATE && 
+            (Math.abs(bombX - location.getX()) > 1 || 
+            Math.abs(bombY - location.getY()) > 1)) {
                 get(bombX, bombY).setState(Tile.BOMB_STATE);
                 bombCount++;
             }
@@ -92,14 +94,14 @@ public class Grid {
             }
             
         };
-        for(int x = 0; x < width; x++)
-            for(int y = 0; y < height; y++) {
+        for(int x = 0; x < height; x++)
+            for(int y = 0; y < width; y++) {
                 Tile tile = get(x, y);
                 if(tile.getState() == Tile.UNSET_STATE) {
                     tile.setState(bombFilter.filter(getNeighbors(x, y)).size());
                 }
                 if(tile.isFlagged()) 
-                    tile.getButton().setDisabledIcon(tile.createIcon("./sprites/flagged.png"));
+                    tile.getButton().setDisabledIcon(tile.createIcon("./" + game.getIconFolder() + "/flagged.png"));
             }
     }
 
