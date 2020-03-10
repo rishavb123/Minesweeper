@@ -17,8 +17,10 @@ import javax.swing.SwingConstants;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 
 public class Minesweeper extends JPanel {
 
@@ -31,7 +33,7 @@ public class Minesweeper extends JPanel {
     private int numOfBombs = 10;
 
     List<String> difficulties = Arrays.asList("Beginner 10 10 9", "Intermediate 16 16 40", "Expert 30 16 99");
-    List<String> iconFolders = Arrays.asList("Default", "Test");
+    List<String> iconFolders = Arrays.asList("Default", "Mario Kart");
 
     private JFrame frame;
 
@@ -125,6 +127,7 @@ public class Minesweeper extends JPanel {
         setSmileIcon("./" + iconFolder + "/face.png");
 
         JPanel tempPanel = new JPanel();
+        tempPanel.setBackground(Color.BLACK);
         tempPanel.add(smileButton);
         topPanel.add(tempPanel);
         smileButton.addActionListener(new ActionListener() {
@@ -138,6 +141,12 @@ public class Minesweeper extends JPanel {
 
         timeLabel = new JLabel("000", SwingConstants.CENTER);
 
+        Font font = Util.createFont("./fonts/digital.ttf");
+        timeLabel.setFont(font);
+        timeLabel.setForeground(Color.RED);
+        
+        topPanel.setOpaque(true);
+        topPanel.setBackground(Color.BLACK);
         topPanel.add(timeLabel);
 
         frame.setJMenuBar(menuBar);
@@ -145,7 +154,7 @@ public class Minesweeper extends JPanel {
         grid = new Grid(gridWidth, gridHeight, frame.getWidth(), frame.getHeight() - topPanelHeight, numOfBombs, this);
 
         frame.setVisible(true);
-    }
+    }   
 
     public void setSmileIcon(String path) {
         ImageIcon icon = new ImageIcon(path);
