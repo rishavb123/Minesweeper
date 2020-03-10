@@ -4,8 +4,12 @@ import java.util.List;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
+import java.io.File;
+import java.awt.GraphicsEnvironment;
 
 public class Util {
+
+    private static GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
     public static abstract class Filter<E> {
         public abstract boolean shouldKeep(E obj);
@@ -28,7 +32,9 @@ public class Util {
 
     public static Font createFont(String path) {
         try {
-            return Font.createFont(Font.TRUETYPE_FONT, Util.class.getResourceAsStream(path));
+            Font f =  Font.createFont(Font.TRUETYPE_FONT, new File(path)).deriveFont(25f);
+            ge.registerFont(f);
+            return f;
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
