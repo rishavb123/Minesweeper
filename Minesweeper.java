@@ -33,7 +33,7 @@ public class Minesweeper extends JPanel {
     private int numOfBombs = 10;
 
     List<String> difficulties = Arrays.asList("Beginner 10 10 9", "Intermediate 16 16 40", "Expert 30 16 99");
-    List<String> iconFolders = Arrays.asList("Default", "Mario Kart");
+    List<String> iconFolders = Arrays.asList("Default", "Mario Kart", "Magic The Gathering");
 
     private JFrame frame;
 
@@ -141,9 +141,12 @@ public class Minesweeper extends JPanel {
 
         timeLabel = new JLabel("000", SwingConstants.CENTER);
 
-        Font font = Util.createFont("./fonts/digital.ttf");
+        Font font = Util.createFont("./fonts/digital.ttf").deriveFont(25f);
         timeLabel.setFont(font);
         timeLabel.setForeground(Color.RED);
+
+        flagsLabel.setFont(font.deriveFont(15f));
+        flagsLabel.setForeground(Color.RED);
         
         topPanel.setOpaque(true);
         topPanel.setBackground(Color.BLACK);
