@@ -32,7 +32,7 @@ public class Tile {
             
             @Override
             public void mousePressed(MouseEvent e) {
-                if(game.isPlaying())
+                if(game.isPlaying() && e.getButton() == MouseEvent.BUTTON1)
                     game.setSmileIcon("./" + game.getIconFolder() + "/clicking.png");
             }
 
