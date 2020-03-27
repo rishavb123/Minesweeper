@@ -13,9 +13,12 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -91,6 +94,30 @@ public class Minesweeper extends JPanel {
             });
             menu.add(menuItem);
         }
+        JTextField field = new JTextField();
+        field.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String[] arr = e.getActionCommand().split(" ");
+                    int nGridWidth = Integer.parseInt(arr[0]);
+                    int nGridHeight = Integer.parseInt(arr[1]);
+                    int nNumOfBombs = Integer.parseInt(arr[2]);
+                    if(nGridWidth * nGridHeight - 9 < nNumOfBombs || nGridWidth < 0 || nGridHeight < 0 || nNumOfBombs < 0) throw new Exception();
+                    gridWidth = nGridWidth;
+                    gridHeight = nGridHeight;
+                    numOfBombs = nNumOfBombs;
+                    frame.setSize(Tile.WIDTH * gridWidth, Tile.WIDTH * gridHeight + topPanelHeight);
+                    reset();
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(frame, "Make sure to format your input as follows:\n{grid width} {grid height} {num of bombs}\nand also ensure that there are enough squares for the bombs to fit even after the first 9 squares are expanded.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                }
+                field.setText("");
+            }
+            
+        });
+        menu.add(field);
 
         for(String iconFolder: iconFolders) {
             JMenuItem menuItem = new JMenuItem(iconFolder);
@@ -180,12 +207,10 @@ public class Minesweeper extends JPanel {
 
     public void addSelected() {
         this.numSelected++;
-        System.out.println(numSelected);
     }
 
     public void removeSelected() {
         this.numSelected--;
-        System.out.println(numSelected);
     }
 
     public void startTimer() {
@@ -216,7 +241,6 @@ public class Minesweeper extends JPanel {
 
     public void gameOver() {
         if(playing) {
-            System.out.println("Game Over: " + playing);
             playing = false;
             timer.cancel();
             setSmileIcon("./" + iconFolder + "/dead.png");
@@ -226,12 +250,13 @@ public class Minesweeper extends JPanel {
                     tile.getButton().setIcon(tile.createIcon("./" + iconFolder + "/not_mine.png"));
                 }
                 if(!tile.isRevealed())
-                    if(tile.getState() == Tile.BOMB_STATE)
-                        tile.reveal();
-                    else
-                        tile.getButton().setDisabledIcon(tile.getButton().getIcon());
+                if(tile.getState() == Tile.BOMB_STATE)
+                tile.reveal();
+                else
+                tile.getButton().setDisabledIcon(tile.getButton().getIcon());
                 tile.getButton().setEnabled(false);
             }
+            JOptionPane.showMessageDialog(frame, "You hit a bomb. Better luck next time!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -246,6 +271,7 @@ public class Minesweeper extends JPanel {
                 }
                 tile.getButton().setEnabled(false);
             }
+            JOptionPane.showMessageDialog(frame, "Great job you managed to uncover all non-bomb tiles!", "You Won!", JOptionPane.INFORMATION_MESSAGE);
         }
     }
     
