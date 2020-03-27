@@ -32,7 +32,7 @@ public class Minesweeper extends JPanel {
     private int gridHeight = 9;
     private int numOfBombs = 10;
 
-    List<String> difficulties = Arrays.asList("Beginner 10 10 9", "Intermediate 16 16 40", "Expert 30 16 99");
+    List<String> difficulties = Arrays.asList("Beginner 9 9 10", "Intermediate 16 16 40", "Expert 30 16 99");
     List<String> iconFolders = Arrays.asList("Default", "Mario Kart", "Magic The Gathering");
 
     private JFrame frame;
@@ -180,10 +180,12 @@ public class Minesweeper extends JPanel {
 
     public void addSelected() {
         this.numSelected++;
+        System.out.println(numSelected);
     }
 
     public void removeSelected() {
         this.numSelected--;
+        System.out.println(numSelected);
     }
 
     public void startTimer() {
@@ -213,33 +215,37 @@ public class Minesweeper extends JPanel {
     }
 
     public void gameOver() {
-        playing = false;
-        timer.cancel();
-        setSmileIcon("./" + iconFolder + "/dead.png");
-        for(Tile tile: grid.getTileList()) {
-            if(tile.isFlagged() && tile.getState() != Tile.BOMB_STATE) {
-                tile.setFlagged(false);
-                tile.getButton().setIcon(tile.createIcon("./" + iconFolder + "/not_mine.png"));
+        if(playing) {
+            System.out.println("Game Over: " + playing);
+            playing = false;
+            timer.cancel();
+            setSmileIcon("./" + iconFolder + "/dead.png");
+            for(Tile tile: grid.getTileList()) {
+                if(tile.isFlagged() && tile.getState() != Tile.BOMB_STATE) {
+                    tile.setFlagged(false);
+                    tile.getButton().setIcon(tile.createIcon("./" + iconFolder + "/not_mine.png"));
+                }
+                if(!tile.isRevealed())
+                    if(tile.getState() == Tile.BOMB_STATE)
+                        tile.reveal();
+                    else
+                        tile.getButton().setDisabledIcon(tile.getButton().getIcon());
+                tile.getButton().setEnabled(false);
             }
-            if(!tile.isRevealed())
-                if(tile.getState() == Tile.BOMB_STATE)
-                    tile.reveal();
-                else
-                    tile.getButton().setDisabledIcon(tile.getButton().getIcon());
-            tile.getButton().setEnabled(false);
         }
-
     }
 
     public void wonGame() {
-        playing = false;
-        timer.cancel();
-        setSmileIcon("./" + iconFolder + "/win.png");
-        for(Tile tile: grid.getTileList()) {
-            if(!tile.isFlagged() && tile.getState() == Tile.BOMB_STATE) {
-                tile.setFlagged(true);
+        if(playing) {
+            playing = false;
+            timer.cancel();
+            setSmileIcon("./" + iconFolder + "/win.png");
+            for(Tile tile: grid.getTileList()) {
+                if(!tile.isFlagged() && tile.getState() == Tile.BOMB_STATE) {
+                    tile.setFlagged(true);
+                }
+                tile.getButton().setEnabled(false);
             }
-            tile.getButton().setEnabled(false);
         }
     }
     

@@ -38,8 +38,8 @@ public class Tile {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if(game.isPlaying())
-                    game.setSmileIcon("./" + game.getIconFolder() + "/face.png");
+                if(!game.isPlaying()) return;
+                game.setSmileIcon("./" + game.getIconFolder() + "/face.png");
                 if(e.getButton() == MouseEvent.BUTTON3) {
                     if(game.isPlaying() && !button.isSelected() && (game.getFlags() > 0 || isFlagged()))
                         setFlagged(!isFlagged());
@@ -50,11 +50,12 @@ public class Tile {
                             grid.generateBombs(location);
                             game.startTimer();
                         }
-                        reveal();
                         if(state == BOMB_STATE) {
                             button.setDisabledIcon(createIcon("./" + game.getIconFolder() + "/red_mine.png"));
                             game.gameOver();
+                            return;
                         }
+                        reveal();
                     }
                 }
             }
